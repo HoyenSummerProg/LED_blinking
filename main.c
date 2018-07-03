@@ -62,7 +62,6 @@ GPIO_InitTypeDef        GPIO_InitStructure;
   * @param  None
   * @retval None
   */
-	uint8_t GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 	
 int main(void)
 {
@@ -76,14 +75,6 @@ int main(void)
   /* GPIOC Periph clock enable */
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
-  /* Configure PC10 and PC11 in output pushpull mode */
-/*  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5 |  GPIO_Pin_11;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-*/
 	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5 |  GPIO_Pin_11;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -95,16 +86,12 @@ int main(void)
      If you need to fine tune this frequency, you can add more GPIO set/reset 
      cycles to minimize more the infinite loop timing.
      This code needs to be compiled with high speed optimization option.  */
-  int tmp=0;
-	USART_Config();
 	while (1)
   {
     /* Set PC10 and PC11 */
-    //GPIOA->BSRR = BSRR_VAL;
+    GPIOA->BSRR = BSRR_VAL;
     /* Reset PC10 and PC11 */
-//    GPIOA->BRR = BSRR_VAL;
-tmp = GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5);
-printf("%d\n",tmp);
+    GPIOA->BRR = BSRR_VAL;
   }
 }
 
@@ -138,63 +125,3 @@ void assert_failed(uint8_t* file, uint32_t line)
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-static void USART_Config(void)
-{ 
-  USART_InitTypeDef USART_InitStructure;
-  
-  /* USARTx configured as follow:
-  - BaudRate = 115200 baud  
-  - Word Length = 8 Bits
-  - Stop Bit = 1 Stop Bit
-  - Parity = No Parity
-  - Hardware flow control disabled (RTS and CTS signals)
-  - Receive and transmit enabled
-  */
-  USART_InitStructure.USART_BaudRate = 115200;
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-  
-  STM_EVAL_COMInit(COM1, &USART_InitStructure);
-}
-
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART */
-  USART_SendData(EVAL_COM1, (uint8_t) ch);
-
-  /* Loop until transmit data register is empty */
-  while (USART_GetFlagStatus(EVAL_COM1, USART_FLAG_TXE) == RESET)
-  {}
-
-  return ch;
-}
-
-#ifdef  USE_FULL_ASSERT
-
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t* file, uint32_t line)
-{ 
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
-}
-#endif
